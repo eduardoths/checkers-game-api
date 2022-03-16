@@ -19,32 +19,32 @@ func MakeGameService() *game.GameService {
 }
 
 func TestNewGame(t *testing.T) {
+	playerOne := &structs.Player{ID: PlayerOneID}
+	playerTwo := &structs.Player{ID: PlayerTwoID}
 	t.Run("Should return non nil game", func(t *testing.T) {
 		service := MakeGameService()
 
-		game, err := service.NewGame(nil, nil)
+		game, err := service.NewGame(playerOne, playerTwo)
 
 		assert.NoError(t, err)
-		assert.Equal(t, &structs.Game{}, game, "assert game")
+		assert.NotNil(t, game, "assert game is not nil")
 	})
 
 	t.Run("Should have correct player one set", func(t *testing.T) {
-		playerOne := &structs.Player{ID: PlayerOneID}
 		service := MakeGameService()
 
-		actual, err := service.NewGame(playerOne, nil)
+		actual, err := service.NewGame(playerOne, playerTwo)
 
 		assert.NoError(t, err)
-		assert.Equal(t, &structs.Game{PlayerOne: playerOne}, actual)
+		assert.Equal(t, playerOne, actual.PlayerOne)
 	})
 
 	t.Run("Should have correct player two set", func(t *testing.T) {
-		playerTwo := &structs.Player{ID: PlayerTwoID}
 		service := MakeGameService()
 
-		actual, err := service.NewGame(nil, playerTwo)
+		actual, err := service.NewGame(playerOne, playerTwo)
 
 		assert.NoError(t, err)
-		assert.Equal(t, &structs.Game{PlayerTwo: playerTwo}, actual)
+		assert.Equal(t, playerTwo, actual.PlayerTwo)
 	})
 }
