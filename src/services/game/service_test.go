@@ -11,6 +11,7 @@ import (
 
 var (
 	PlayerOneID = uuid.MustParse("a607b8b5-e8a7-4ce9-b001-8f1b3b154490")
+	PlayerTwoID = uuid.MustParse("a607b8b5-e8a7-4ce9-b001-8f1b3b154490")
 )
 
 func MakeGameService() *game.GameService {
@@ -35,5 +36,15 @@ func TestNewGame(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, &structs.Game{PlayerOne: playerOne}, actual)
+	})
+
+	t.Run("Should have correct player two set", func(t *testing.T) {
+		playerTwo := &structs.Player{ID: PlayerTwoID}
+		service := MakeGameService()
+
+		actual, err := service.NewGame(nil, playerTwo)
+
+		assert.NoError(t, err)
+		assert.Equal(t, &structs.Game{PlayerTwo: playerTwo}, actual)
 	})
 }

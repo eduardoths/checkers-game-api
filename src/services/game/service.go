@@ -9,5 +9,5 @@ func NewGameService() *GameService {
 }
 
 func (this *GameService) NewGame(playerOne, playerTwo *structs.Player) (*structs.Game, error) {
-	return &structs.Game{PlayerOne: playerOne}, nil
+	return &structs.Game{PlayerOne: playerOne, PlayerTwo: playerTwo}, nil
 }
