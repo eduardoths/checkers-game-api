@@ -21,6 +21,7 @@ func MakeGameService() *game.GameService {
 func TestNewGame(t *testing.T) {
 	playerOne := &structs.Player{ID: PlayerOneID}
 	playerTwo := &structs.Player{ID: PlayerTwoID}
+	board := structs.NewBoard(playerOne, playerTwo)
 	t.Run("Should return non nil game", func(t *testing.T) {
 		service := MakeGameService()
 
@@ -46,5 +47,14 @@ func TestNewGame(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, playerTwo, actual.PlayerTwo)
+	})
+
+	t.Run("Should have valid board", func(t *testing.T) {
+		service := MakeGameService()
+
+		actual, err := service.NewGame(playerOne, playerTwo)
+
+		assert.NoError(t, err)
+		assert.Equal(t, board, actual.Board)
 	})
 }
