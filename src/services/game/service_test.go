@@ -8,9 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func MakeGameService() *game.GameService {
+	return game.NewGameService()
+}
+
 func TestNewGame(t *testing.T) {
 	t.Run("Should return non nil game", func(t *testing.T) {
-		service := game.NewGameService()
+		service := MakeGameService()
 		game, err := service.NewGame(nil, nil)
 
 		assert.NoError(t, err)
