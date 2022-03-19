@@ -2,7 +2,7 @@ package mocks
 
 import "github.com/eduardoths/checkers-game/src/structs"
 
-func fakeChecker() structs.Checker {
+func FakeChecker() structs.Checker {
 	player := FakePlayer()
 	return structs.Checker{
 		Owner:  &player,
@@ -11,7 +11,7 @@ func fakeChecker() structs.Checker {
 }
 
 func FakeCheckerFromPlayer(player *structs.Player) structs.Checker {
-	checker := fakeChecker()
+	checker := FakeChecker()
 	checker.Owner = player
 	return checker
 }
