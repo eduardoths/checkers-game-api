@@ -10,7 +10,7 @@ var (
 )
 
 func FakeGame() structs.Game {
-	playerOne := FakePlayer()
+	playerOne := FakePlayerOne()
 	playerTwo := FakePlayerTwo()
 	board := structs.NewBoard(&playerOne, &playerTwo)
 	return structs.Game{

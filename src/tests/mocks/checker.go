@@ -3,7 +3,7 @@ package mocks
 import "github.com/eduardoths/checkers-game/src/structs"
 
 func FakeChecker() structs.Checker {
-	player := FakePlayer()
+	player := FakePlayerOne()
 	return structs.Checker{
 		Owner:  &player,
 		IsKing: false,

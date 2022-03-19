@@ -10,7 +10,7 @@ import (
 )
 
 func TestCurrentPlayerID(t *testing.T) {
-	playerOne := mocks.FakePlayer()
+	playerOne := mocks.FakePlayerOne()
 	playerTwo := mocks.FakePlayerTwo()
 	type testCase struct {
 		game structs.Game

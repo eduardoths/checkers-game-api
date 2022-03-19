@@ -15,8 +15,8 @@ var (
 )
 
 func TestNewBoard(t *testing.T) {
-	playerOne := mocks.FakePlayer()
-	playerTwo := mocks.FakePlayer()
+	playerOne := mocks.FakePlayerOne()
+	playerTwo := mocks.FakePlayerOne()
 	playerOne.ID = playerOneID
 	playerTwo.ID = playerTwoID
 	p1 := &playerOne
