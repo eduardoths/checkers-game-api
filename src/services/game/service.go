@@ -1,6 +1,8 @@
 package game
 
-import "github.com/eduardoths/checkers-game/src/structs"
+import (
+	"github.com/eduardoths/checkers-game/src/structs"
+)
 
 type GameService struct{}
 
