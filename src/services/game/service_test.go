@@ -99,6 +99,17 @@ func TestNewGame(t *testing.T) {
 				assert.Equal(t, true, actual.game.IsPlayerOneTurn)
 			},
 		},
+		{
+			description: "Should return new id for game",
+			input: input{
+				playerOne: makePlayerOne(),
+				playerTwo: makePlayerTwo(),
+			},
+			assert: func(t *testing.T, _ input, actual output) {
+				assert.NoError(t, actual.err)
+				assert.NotEqual(t, uuid.Nil, actual.game.ID)
+			},
+		},
 	}
 	for _, tc := range testCases {
 		service := MakeGameService()
