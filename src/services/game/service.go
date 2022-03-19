@@ -3,14 +3,20 @@ package game
 import (
 	"errors"
 
+	"github.com/eduardoths/checkers-game/src/interfaces"
+	"github.com/eduardoths/checkers-game/src/repositories"
 	"github.com/eduardoths/checkers-game/src/structs"
 	"github.com/google/uuid"
 )
 
-type GameService struct{}
+type GameService struct {
+	repository interfaces.GameRepository
+}
 
-func NewGameService() *GameService {
-	return &GameService{}
+func NewGameService(repos repositories.RepositoriesContainer) *GameService {
+	return &GameService{
+		repository: repos.GameRepository,
+	}
 }
 
 func (this *GameService) NewGame(playerOne, playerTwo *structs.Player) (*structs.Game, error) {
@@ -31,6 +37,10 @@ func (this *GameService) NewGame(playerOne, playerTwo *structs.Player) (*structs
 }
 
 func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*structs.Game, error) {
+	_, err := this.repository.FindGame(gameID)
+	if err != nil {
+		return nil, err
+	}
 	if from < structs.BOARD_INIT || from > structs.BOARD_END {
 		return nil, errors.New("invalid_field:checker position is outside of board")
 	}

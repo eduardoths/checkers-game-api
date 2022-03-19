@@ -4,9 +4,13 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/eduardoths/checkers-game/mockgen"
 	"github.com/eduardoths/checkers-game/src/interfaces"
+	"github.com/eduardoths/checkers-game/src/repositories"
 	"github.com/eduardoths/checkers-game/src/services/game"
 	"github.com/eduardoths/checkers-game/src/structs"
+	"github.com/eduardoths/checkers-game/src/tests/mocks"
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,8 +20,21 @@ var (
 	PlayerTwoID = uuid.MustParse("51fa65e9-2637-4fcf-8509-04cc521809d6")
 )
 
-func MakeGameService() interfaces.GameService {
-	return game.NewGameService()
+type mockgenContainer struct {
+	controller *gomock.Controller
+	repository *mockgen.MockGameRepository
+}
+
+func MakeGameService(t *testing.T) (interfaces.GameService, mockgenContainer) {
+	ctrl := gomock.NewController(t)
+	mc := mockgenContainer{
+		controller: ctrl,
+		repository: mockgen.NewMockGameRepository(ctrl),
+	}
+	rc := repositories.RepositoriesContainer{
+		GameRepository: mc.repository,
+	}
+	return game.NewGameService(rc), mc
 }
 
 func TestNewGame(t *testing.T) {
@@ -149,15 +166,16 @@ func TestNewGame(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tc := range testCases {
-		service := MakeGameService()
+		service, mc := MakeGameService(t)
+		defer mc.controller.Finish()
 		actual, err := service.NewGame(tc.input.playerOne, tc.input.playerTwo)
 		tc.assert(t, tc.input, output{game: actual, err: err})
 	}
 }
 
 func TestMoveChecker(t *testing.T) {
-	service := MakeGameService()
 	type input struct {
 		from      int
 		movements []int
@@ -172,13 +190,38 @@ func TestMoveChecker(t *testing.T) {
 	type testCase struct {
 		description string
 		input       input
+		before      func(in input, mc *mockgenContainer)
 		assert      func(t *testing.T, in input, actual output)
+	}
+
+	defaultStubs := func(_ input, mc *mockgenContainer) {
+		defaultGame := mocks.FakeGame()
+		exp := mc.repository.EXPECT()
+		stubs := []*gomock.Call{
+			exp.FindGame(gomock.Any()).Return(&defaultGame, nil),
+		}
+		for i := range stubs {
+			stubs[i].AnyTimes()
+		}
 	}
 
 	testCases := []testCase{
 		{
+			description: "Should throw error if game's not found",
+			input:       input{gameID: uuid.New()},
+			before: func(in input, mc *mockgenContainer) {
+				err := errors.New("not found")
+				mc.repository.EXPECT().FindGame(gomock.Eq(in.gameID)).Return(nil, err)
+			},
+			assert: func(t *testing.T, in input, actual output) {
+				assert.Nil(t, actual.game)
+				assert.Equal(t, errors.New("not found"), actual.err)
+			},
+		},
+		{
 			description: "Should throw error if select checker is before board init",
 			input:       input{from: structs.BOARD_INIT - 1},
+			before:      defaultStubs,
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := errors.New("invalid_field:checker position is outside of board")
 				assert.Nil(t, actual.game)
@@ -187,6 +230,7 @@ func TestMoveChecker(t *testing.T) {
 		},
 		{
 			description: "Should throw error if select checker is after board end",
+			before:      defaultStubs,
 			input:       input{from: structs.BOARD_END + 1},
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := errors.New("invalid_field:checker position is outside of board")
@@ -196,6 +240,7 @@ func TestMoveChecker(t *testing.T) {
 		},
 		{
 			description: "Should throw error if checker is nil at selected pos",
+			before:      defaultStubs,
 			input:       input{from: structs.BOARD_INIT},
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := errors.New("invalid_field:no checker at selected position")
@@ -204,8 +249,12 @@ func TestMoveChecker(t *testing.T) {
 			},
 		},
 	}
+
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
+			service, mc := MakeGameService(t)
+			defer mc.controller.Finish()
+			tc.before(tc.input, &mc)
 			game, err := service.Move(tc.input.gameID, tc.input.from, tc.input.movements)
 			tc.assert(t, tc.input, output{game: game, err: err})
 		})
