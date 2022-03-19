@@ -29,3 +29,10 @@ func (this *GameService) NewGame(playerOne, playerTwo *structs.Player) (*structs
 	}
 	return game, nil
 }
+
+func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*structs.Game, error) {
+	if from < structs.BOARD_INIT || from > structs.BOARD_END {
+		return nil, errors.New("invalid_field:checker position is outside of board")
+	}
+	return nil, nil
+}

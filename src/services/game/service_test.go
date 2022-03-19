@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/eduardoths/checkers-game/src/interfaces"
 	"github.com/eduardoths/checkers-game/src/services/game"
 	"github.com/eduardoths/checkers-game/src/structs"
 	"github.com/google/uuid"
@@ -15,7 +16,7 @@ var (
 	PlayerTwoID = uuid.MustParse("51fa65e9-2637-4fcf-8509-04cc521809d6")
 )
 
-func MakeGameService() *game.GameService {
+func MakeGameService() interfaces.GameService {
 	return game.NewGameService()
 }
 
@@ -152,5 +153,52 @@ func TestNewGame(t *testing.T) {
 		service := MakeGameService()
 		actual, err := service.NewGame(tc.input.playerOne, tc.input.playerTwo)
 		tc.assert(t, tc.input, output{game: actual, err: err})
+	}
+}
+
+func TestMoveChecker(t *testing.T) {
+	service := MakeGameService()
+	type input struct {
+		from      int
+		movements []int
+		gameID    uuid.UUID
+	}
+
+	type output struct {
+		game *structs.Game
+		err  error
+	}
+
+	type testCase struct {
+		description string
+		input       input
+		assert      func(t *testing.T, in input, actual output)
+	}
+
+	testCases := []testCase{
+		{
+			description: "Should throw error if select checker is before board init",
+			input:       input{from: structs.BOARD_INIT - 1},
+			assert: func(t *testing.T, in input, actual output) {
+				wantErr := errors.New("invalid_field:checker position is outside of board")
+				assert.Nil(t, actual.game)
+				assert.Equal(t, wantErr, actual.err)
+			},
+		},
+		{
+			description: "Should throw error if select checker is after board end",
+			input:       input{from: structs.BOARD_END + 1},
+			assert: func(t *testing.T, in input, actual output) {
+				wantErr := errors.New("invalid_field:checker position is outside of board")
+				assert.Nil(t, actual.game)
+				assert.Equal(t, wantErr, actual.err)
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			game, err := service.Move(tc.input.gameID, tc.input.from, tc.input.movements)
+			tc.assert(t, tc.input, output{game: game, err: err})
+		})
 	}
 }

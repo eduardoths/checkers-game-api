@@ -5,6 +5,8 @@ type Board [ROW_LENGTH * COLUMN_LENGTH]*Checker
 const (
 	ROW_LENGTH    = 8
 	COLUMN_LENGTH = 8
+	BOARD_INIT    = 0
+	BOARD_END     = 63
 )
 
 func NewBoard(playerOne, playerTwo *Player) *Board {
