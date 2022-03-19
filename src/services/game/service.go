@@ -10,9 +10,10 @@ func NewGameService() *GameService {
 
 func (this *GameService) NewGame(playerOne, playerTwo *structs.Player) (*structs.Game, error) {
 	game := &structs.Game{
-		PlayerOne: playerOne,
-		PlayerTwo: playerTwo,
-		Board:     structs.NewBoard(playerOne, playerTwo),
+		PlayerOne:       playerOne,
+		PlayerTwo:       playerTwo,
+		Board:           structs.NewBoard(playerOne, playerTwo),
+		IsPlayerOneTurn: true,
 	}
 	return game, nil
 }

@@ -57,4 +57,13 @@ func TestNewGame(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, board, actual.Board)
 	})
+
+	t.Run("Should be player one turn", func(t *testing.T) {
+		service := MakeGameService()
+
+		actual, err := service.NewGame(playerOne, playerTwo)
+
+		assert.NoError(t, err)
+		assert.Equal(t, true, actual.IsPlayerOneTurn)
+	})
 }
