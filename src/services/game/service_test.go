@@ -1,6 +1,7 @@
 package game_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/eduardoths/checkers-game/src/services/game"
@@ -108,6 +109,42 @@ func TestNewGame(t *testing.T) {
 			assert: func(t *testing.T, _ input, actual output) {
 				assert.NoError(t, actual.err)
 				assert.NotEqual(t, uuid.Nil, actual.game.ID)
+			},
+		},
+		{
+			description: "Should throw error if playerOne is nil",
+			input: input{
+				playerOne: nil,
+				playerTwo: makePlayerTwo(),
+			},
+			assert: func(t *testing.T, _ input, actual output) {
+				wantErr := errors.New("invalid_field:player is nil")
+				assert.Equal(t, wantErr, actual.err)
+				assert.Nil(t, actual.game)
+			},
+		},
+		{
+			description: "Should throw error if playerTwo is nil",
+			input: input{
+				playerOne: makePlayerOne(),
+				playerTwo: nil,
+			},
+			assert: func(t *testing.T, _ input, actual output) {
+				wantErr := errors.New("invalid_field:player is nil")
+				assert.Equal(t, wantErr, actual.err)
+				assert.Nil(t, actual.game)
+			},
+		},
+		{
+			description: "Should throw error if player one and player two are the same",
+			input: input{
+				playerOne: makePlayerOne(),
+				playerTwo: makePlayerOne(),
+			},
+			assert: func(t *testing.T, _ input, actual output) {
+				wantErr := errors.New("invalid_field:both players are the same")
+				assert.Equal(t, wantErr, actual.err)
+				assert.Nil(t, actual.game)
 			},
 		},
 	}
