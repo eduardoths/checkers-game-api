@@ -194,6 +194,15 @@ func TestMoveChecker(t *testing.T) {
 				assert.Equal(t, wantErr, actual.err)
 			},
 		},
+		{
+			description: "Should throw error if checker is nil at selected pos",
+			input:       input{from: structs.BOARD_INIT},
+			assert: func(t *testing.T, in input, actual output) {
+				wantErr := errors.New("invalid_field:no checker at selected position")
+				assert.Nil(t, actual.game)
+				assert.Equal(t, wantErr, actual.err)
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {

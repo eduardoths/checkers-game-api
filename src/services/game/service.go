@@ -34,5 +34,5 @@ func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*str
 	if from < structs.BOARD_INIT || from > structs.BOARD_END {
 		return nil, errors.New("invalid_field:checker position is outside of board")
 	}
-	return nil, nil
+	return nil, errors.New("invalid_field:no checker at selected position")
 }
