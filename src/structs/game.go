@@ -9,3 +9,10 @@ type Game struct {
 	PlayerTwo       *Player
 	IsPlayerOneTurn bool
 }
+
+func (this *Game) CurrentPlayerID() uuid.UUID {
+	if this.IsPlayerOneTurn {
+		return this.PlayerOne.ID
+	}
+	return this.PlayerTwo.ID
+}

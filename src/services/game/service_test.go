@@ -194,8 +194,9 @@ func TestMoveChecker(t *testing.T) {
 		assert      func(t *testing.T, in input, actual output)
 	}
 
-	defaultStubs := func(_ input, mc *mockgenContainer) {
+	defaultStubs := func(in input, mc *mockgenContainer) {
 		defaultGame := mocks.FakeGame()
+		defaultGame.ID = in.gameID
 		exp := mc.repository.EXPECT()
 		stubs := []*gomock.Call{
 			exp.FindGame(gomock.Any()).Return(&defaultGame, nil),
@@ -244,6 +245,41 @@ func TestMoveChecker(t *testing.T) {
 			input:       input{from: structs.BOARD_INIT},
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := errors.New("invalid_field:no checker at selected position")
+				assert.Nil(t, actual.game)
+				assert.Equal(t, wantErr, actual.err)
+			},
+		},
+		{
+			description: "Should throw error if it's not the player one turn",
+			before: func(in input, mc *mockgenContainer) {
+				game := mocks.FakeGame()
+				checker := mocks.FakeCheckerFromPlayer(game.PlayerOne)
+				board := &structs.Board{&checker}
+				game.Board = board
+				game.IsPlayerOneTurn = false
+				game.ID = in.gameID
+				mc.repository.EXPECT().FindGame(gomock.Eq(in.gameID)).Return(&game, nil)
+			},
+			input: input{gameID: uuid.New(), from: 0},
+			assert: func(t *testing.T, in input, actual output) {
+				wantErr := errors.New("invalid_field:it's not the player's turn")
+				assert.Nil(t, actual.game)
+				assert.Equal(t, wantErr, actual.err)
+			},
+		},
+		{
+			description: "Should throw error if it's not the player two turns",
+			before: func(in input, mc *mockgenContainer) {
+				game := mocks.FakeGame()
+				checker := mocks.FakeCheckerFromPlayer(game.PlayerTwo)
+				board := &structs.Board{&checker}
+				game.Board = board
+				game.ID = in.gameID
+				mc.repository.EXPECT().FindGame(gomock.Eq(in.gameID)).Return(&game, nil)
+			},
+			input: input{gameID: uuid.New(), from: 0},
+			assert: func(t *testing.T, in input, actual output) {
+				wantErr := errors.New("invalid_field:it's not the player's turn")
 				assert.Nil(t, actual.game)
 				assert.Equal(t, wantErr, actual.err)
 			},

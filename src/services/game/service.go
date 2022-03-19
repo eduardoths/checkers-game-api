@@ -37,12 +37,25 @@ func (this *GameService) NewGame(playerOne, playerTwo *structs.Player) (*structs
 }
 
 func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*structs.Game, error) {
-	_, err := this.repository.FindGame(gameID)
+	game, err := this.repository.FindGame(gameID)
 	if err != nil {
 		return nil, err
 	}
+
+	currentPlayerID := game.CurrentPlayerID()
+
 	if from < structs.BOARD_INIT || from > structs.BOARD_END {
 		return nil, errors.New("invalid_field:checker position is outside of board")
 	}
-	return nil, errors.New("invalid_field:no checker at selected position")
+
+	source := game.Board.GetCheckerFromPos(from)
+	if source == nil {
+		return nil, errors.New("invalid_field:no checker at selected position")
+	}
+
+	if source.Owner.ID != currentPlayerID {
+		return nil, errors.New("invalid_field:it's not the player's turn")
+	}
+
+	return nil, nil
 }

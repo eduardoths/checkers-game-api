@@ -38,3 +38,10 @@ func (this *Board) fillWithPlayer(start, end int, player *Player) {
 		}
 	}
 }
+
+func (this *Board) GetCheckerFromPos(pos int) *Checker {
+	if pos >= BOARD_INIT && pos <= BOARD_END {
+		return this[pos]
+	}
+	return nil
+}
