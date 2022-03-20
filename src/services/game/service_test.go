@@ -269,26 +269,6 @@ func TestMoveChecker(t *testing.T) {
 			},
 		},
 		{
-			description: "Should throw error if select checker is before board init",
-			input:       input{from: structs.BOARD_INIT - 1},
-			before:      defaultBeforeCallback,
-			assert: func(t *testing.T, in input, actual output) {
-				wantErr := domain.ErrNoCheckerAtSelectedPosition
-				assert.Nil(t, actual.game)
-				assert.Equal(t, wantErr, actual.err)
-			},
-		},
-		{
-			description: "Should throw error if select checker is after board end",
-			before:      defaultBeforeCallback,
-			input:       input{from: structs.BOARD_END + 1},
-			assert: func(t *testing.T, in input, actual output) {
-				wantErr := domain.ErrNoCheckerAtSelectedPosition
-				assert.Nil(t, actual.game)
-				assert.Equal(t, wantErr, actual.err)
-			},
-		},
-		{
 			description: "Should throw error if checker is nil at selected pos",
 			before:      defaultBeforeCallback,
 			input:       input{from: structs.BOARD_INIT},
@@ -329,6 +309,16 @@ func TestMoveChecker(t *testing.T) {
 			input: input{gameID: uuid.New(), from: 0},
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := domain.ErrNotPlayersTurn
+				assert.Nil(t, actual.game)
+				assert.Equal(t, wantErr, actual.err)
+			},
+		},
+		{
+			description: "It should throw error if movement validation fails",
+			before:      defaultBeforeCallback,
+			input:       input{gameID: uuid.New(), from: 1, movements: []int{-1}},
+			assert: func(t *testing.T, in input, actual output) {
+				wantErr := domain.ErrInvalidMovement
 				assert.Nil(t, actual.game)
 				assert.Equal(t, wantErr, actual.err)
 			},

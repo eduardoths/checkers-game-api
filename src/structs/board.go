@@ -30,18 +30,53 @@ func (this *Board) fillPlayerTwoCheckers(playerTwo *Player) {
 
 func (this *Board) fillWithPlayer(start, end int, player *Player) {
 	for i := start; i < end; i++ {
-		rowNumber := i / 8
-		isEvenRow := rowNumber%2 == 0
-		isEvenColumn := i%2 == 0
-		if isEvenColumn != isEvenRow { // xor equivalent
+		isValidColumn := this.isColumnValid(i)
+		if isValidColumn {
 			this[i] = &Checker{Owner: player, IsKing: false}
 		}
 	}
 }
 
+func (this *Board) isColumnValid(pos int) bool {
+	rowNumber := pos / 8
+	isEvenRow := rowNumber%2 == 0
+	isEvenColumn := pos%2 == 0
+	if isEvenColumn != isEvenRow { // xor equivalent
+		return true
+	}
+	return false
+}
+
 func (this *Board) GetCheckerFromPos(pos int) *Checker {
-	if pos >= BOARD_INIT && pos <= BOARD_END {
+	if this.positionIsOnBoard(pos) {
 		return this[pos]
 	}
 	return nil
+}
+
+func (this *Board) IsValidPosition(pos int) bool {
+	validations := []func(int) bool{
+		this.positionIsOnBoard,
+		this.isColumnValid,
+		this.positionHasNoChecker,
+	}
+	for _, validation := range validations {
+		isValid := validation(pos)
+		if !isValid {
+			return false
+		}
+	}
+	return true
+}
+
+func (this *Board) positionHasNoChecker(pos int) bool {
+	checker := this.GetCheckerFromPos(pos)
+	return checker == nil
+}
+
+func (this *Board) positionIsOnBoard(pos int) bool {
+	if pos >= BOARD_INIT && pos <= BOARD_END {
+		return true
+	}
+	return false
 }

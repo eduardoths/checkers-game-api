@@ -69,3 +69,45 @@ func TestGetCheckerFromPos(t *testing.T) {
 		})
 	}
 }
+
+func TestIsPositionValidForMovement(t *testing.T) {
+	type testCase struct {
+		board    structs.Board
+		position int
+		want     bool
+	}
+
+	testCases := map[string]testCase{
+		"it should return false if column is invalid": {
+			board:    mocks.FakeBoard(),
+			position: 0,
+			want:     false,
+		},
+		"it should return false if there's a checker on it": {
+			board:    structs.Board{nil, &structs.Checker{}},
+			position: 1,
+			want:     false,
+		},
+		"it should return false if position is before board init": {
+			board:    mocks.FakeBoard(),
+			position: structs.BOARD_INIT - 1,
+			want:     false,
+		},
+		"it should return false if position is after board end": {
+			board:    mocks.FakeBoard(),
+			position: structs.BOARD_END + 1,
+			want:     false,
+		},
+		"it should return true otherwise": {
+			board:    structs.Board{},
+			position: 1,
+			want:     true,
+		},
+	}
+	for description, tc := range testCases {
+		t.Run(description, func(t *testing.T) {
+			actual := tc.board.IsValidPosition(tc.position)
+			assert.Equal(t, tc.want, actual)
+		})
+	}
+}
