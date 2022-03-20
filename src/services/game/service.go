@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 
+	"github.com/eduardoths/checkers-game/src/domain"
 	"github.com/eduardoths/checkers-game/src/interfaces"
 	"github.com/eduardoths/checkers-game/src/repositories"
 	"github.com/eduardoths/checkers-game/src/structs"
@@ -21,10 +22,10 @@ func NewGameService(repos repositories.RepositoriesContainer) *GameService {
 
 func (this *GameService) NewGame(playerOne, playerTwo *structs.Player) (*structs.Game, error) {
 	if playerOne == nil || playerTwo == nil {
-		return nil, errors.New("invalid_field:player is nil")
+		return nil, errors.New("invalid_field:player")
 	}
 	if playerOne.ID == playerTwo.ID {
-		return nil, errors.New("invalid_field:both players are the same")
+		return nil, errors.New("invalid_field:player")
 	}
 	game := &structs.Game{
 		ID:              uuid.New(),
@@ -48,16 +49,16 @@ func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*str
 	currentPlayerID := game.CurrentPlayerID()
 
 	if from < structs.BOARD_INIT || from > structs.BOARD_END {
-		return nil, errors.New("invalid_field:checker position is outside of board")
+		return nil, domain.ErrNoCheckerAtSelectedPosition
 	}
 
 	source := game.Board.GetCheckerFromPos(from)
 	if source == nil {
-		return nil, errors.New("invalid_field:no checker at selected position")
+		return nil, domain.ErrNoCheckerAtSelectedPosition
 	}
 
 	if source.Owner.ID != currentPlayerID {
-		return nil, errors.New("invalid_field:it's not the player's turn")
+		return nil, domain.ErrNotPlayersTurn
 	}
 
 	return nil, nil

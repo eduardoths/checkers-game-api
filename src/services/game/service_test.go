@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/eduardoths/checkers-game/mockgen"
+	"github.com/eduardoths/checkers-game/src/domain"
 	"github.com/eduardoths/checkers-game/src/interfaces"
 	"github.com/eduardoths/checkers-game/src/repositories"
 	"github.com/eduardoths/checkers-game/src/services/game"
@@ -160,7 +161,7 @@ func TestNewGame(t *testing.T) {
 				playerTwo: makePlayerTwo(),
 			},
 			assert: func(t *testing.T, _ input, actual output) {
-				wantErr := errors.New("invalid_field:player is nil")
+				wantErr := errors.New("invalid_field:player")
 				assert.Equal(t, wantErr, actual.err)
 				assert.Nil(t, actual.game)
 			},
@@ -173,7 +174,7 @@ func TestNewGame(t *testing.T) {
 				playerTwo: nil,
 			},
 			assert: func(t *testing.T, _ input, actual output) {
-				wantErr := errors.New("invalid_field:player is nil")
+				wantErr := errors.New("invalid_field:player")
 				assert.Equal(t, wantErr, actual.err)
 				assert.Nil(t, actual.game)
 			},
@@ -186,7 +187,7 @@ func TestNewGame(t *testing.T) {
 				playerTwo: makePlayerOne(),
 			},
 			assert: func(t *testing.T, _ input, actual output) {
-				wantErr := errors.New("invalid_field:both players are the same")
+				wantErr := errors.New("invalid_field:player")
 				assert.Equal(t, wantErr, actual.err)
 				assert.Nil(t, actual.game)
 			},
@@ -272,7 +273,7 @@ func TestMoveChecker(t *testing.T) {
 			input:       input{from: structs.BOARD_INIT - 1},
 			before:      defaultBeforeCallback,
 			assert: func(t *testing.T, in input, actual output) {
-				wantErr := errors.New("invalid_field:checker position is outside of board")
+				wantErr := domain.ErrNoCheckerAtSelectedPosition
 				assert.Nil(t, actual.game)
 				assert.Equal(t, wantErr, actual.err)
 			},
@@ -282,7 +283,7 @@ func TestMoveChecker(t *testing.T) {
 			before:      defaultBeforeCallback,
 			input:       input{from: structs.BOARD_END + 1},
 			assert: func(t *testing.T, in input, actual output) {
-				wantErr := errors.New("invalid_field:checker position is outside of board")
+				wantErr := domain.ErrNoCheckerAtSelectedPosition
 				assert.Nil(t, actual.game)
 				assert.Equal(t, wantErr, actual.err)
 			},
@@ -292,7 +293,7 @@ func TestMoveChecker(t *testing.T) {
 			before:      defaultBeforeCallback,
 			input:       input{from: structs.BOARD_INIT},
 			assert: func(t *testing.T, in input, actual output) {
-				wantErr := errors.New("invalid_field:no checker at selected position")
+				wantErr := domain.ErrNoCheckerAtSelectedPosition
 				assert.Nil(t, actual.game)
 				assert.Equal(t, wantErr, actual.err)
 			},
@@ -310,7 +311,7 @@ func TestMoveChecker(t *testing.T) {
 			},
 			input: input{gameID: uuid.New(), from: 0},
 			assert: func(t *testing.T, in input, actual output) {
-				wantErr := errors.New("invalid_field:it's not the player's turn")
+				wantErr := domain.ErrNotPlayersTurn
 				assert.Nil(t, actual.game)
 				assert.Equal(t, wantErr, actual.err)
 			},
@@ -327,7 +328,7 @@ func TestMoveChecker(t *testing.T) {
 			},
 			input: input{gameID: uuid.New(), from: 0},
 			assert: func(t *testing.T, in input, actual output) {
-				wantErr := errors.New("invalid_field:it's not the player's turn")
+				wantErr := domain.ErrNotPlayersTurn
 				assert.Nil(t, actual.game)
 				assert.Equal(t, wantErr, actual.err)
 			},
