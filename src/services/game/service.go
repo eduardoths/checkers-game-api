@@ -46,15 +46,18 @@ func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*str
 		return nil, err
 	}
 
-	currentPlayerID := game.CurrentPlayerID()
-
 	source := game.Board.GetCheckerFromPos(from)
 	if source == nil {
 		return nil, domain.ErrNoCheckerAtSelectedPosition
 	}
 
+	currentPlayerID := game.CurrentPlayerID()
 	if source.Owner.ID != currentPlayerID {
 		return nil, domain.ErrNotPlayersTurn
+	}
+
+	if len(movements) == 0 {
+		return nil, domain.ErrInvalidFieldMovementsArray
 	}
 
 	isValidPosition := game.Board.IsValidPosition(from + movements[0])

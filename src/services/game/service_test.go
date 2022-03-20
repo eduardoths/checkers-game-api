@@ -316,9 +316,19 @@ func TestMoveChecker(t *testing.T) {
 		{
 			description: "It should throw error if movement validation fails",
 			before:      defaultBeforeCallback,
-			input:       input{gameID: uuid.New(), from: 1, movements: []int{-1}},
+			input:       input{from: 1, movements: []int{-1}},
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := domain.ErrInvalidMovement
+				assert.Nil(t, actual.game)
+				assert.Equal(t, wantErr, actual.err)
+			},
+		},
+		{
+			description: "Should throw error if movements array's size is zero",
+			before:      defaultBeforeCallback,
+			input:       input{from: 1},
+			assert: func(t *testing.T, in input, actual output) {
+				wantErr := domain.ErrInvalidFieldMovementsArray
 				assert.Nil(t, actual.game)
 				assert.Equal(t, wantErr, actual.err)
 			},
