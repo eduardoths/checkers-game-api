@@ -33,6 +33,9 @@ func (this *GameService) NewGame(playerOne, playerTwo *structs.Player) (*structs
 		Board:           structs.NewBoard(playerOne, playerTwo),
 		IsPlayerOneTurn: true,
 	}
+	if err := this.repository.SaveGame(game); err != nil {
+		return nil, err
+	}
 	return game, nil
 }
 

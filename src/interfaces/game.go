@@ -11,5 +11,6 @@ type GameService interface {
 }
 
 type GameRepository interface {
+	SaveGame(game *structs.Game) error
 	FindGame(id uuid.UUID) (*structs.Game, error)
 }

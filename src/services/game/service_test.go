@@ -25,6 +25,18 @@ type mockgenContainer struct {
 	repository *mockgen.MockGameRepository
 }
 
+func defaultStubs(mc *mockgenContainer) {
+	defaultGame := mocks.FakeGame()
+	exp := mc.repository.EXPECT()
+	stubs := []*gomock.Call{
+		exp.FindGame(gomock.Any()).Return(&defaultGame, nil),
+		exp.SaveGame(gomock.Any()).Return(nil),
+	}
+	for i := range stubs {
+		stubs[i].AnyTimes()
+	}
+}
+
 func MakeGameService(t *testing.T) (interfaces.GameService, mockgenContainer) {
 	ctrl := gomock.NewController(t)
 	mc := mockgenContainer{
@@ -57,13 +69,19 @@ func TestNewGame(t *testing.T) {
 
 	type testCase struct {
 		description string
+		before      func(in input, mc *mockgenContainer)
 		input       input
 		assert      func(*testing.T, input, output)
+	}
+
+	defaultBeforeCallback := func(_ input, mc *mockgenContainer) {
+		defaultStubs(mc)
 	}
 
 	testCases := []testCase{
 		{
 			description: "Should return non nil game",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: makePlayerOne(),
 				playerTwo: makePlayerTwo(),
@@ -75,6 +93,7 @@ func TestNewGame(t *testing.T) {
 		},
 		{
 			description: "Should have correct player one set",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: makePlayerOne(),
 				playerTwo: makePlayerTwo(),
@@ -86,6 +105,7 @@ func TestNewGame(t *testing.T) {
 		},
 		{
 			description: "Should have correct player two set",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: makePlayerOne(),
 				playerTwo: makePlayerTwo(),
@@ -97,6 +117,7 @@ func TestNewGame(t *testing.T) {
 		},
 		{
 			description: "Should have a new board",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: makePlayerOne(),
 				playerTwo: makePlayerTwo(),
@@ -109,6 +130,7 @@ func TestNewGame(t *testing.T) {
 		},
 		{
 			description: "Should be player one's turn",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: makePlayerOne(),
 				playerTwo: makePlayerTwo(),
@@ -120,6 +142,7 @@ func TestNewGame(t *testing.T) {
 		},
 		{
 			description: "Should return new id for game",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: makePlayerOne(),
 				playerTwo: makePlayerTwo(),
@@ -131,6 +154,7 @@ func TestNewGame(t *testing.T) {
 		},
 		{
 			description: "Should throw error if playerOne is nil",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: nil,
 				playerTwo: makePlayerTwo(),
@@ -143,6 +167,7 @@ func TestNewGame(t *testing.T) {
 		},
 		{
 			description: "Should throw error if playerTwo is nil",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: makePlayerOne(),
 				playerTwo: nil,
@@ -155,6 +180,7 @@ func TestNewGame(t *testing.T) {
 		},
 		{
 			description: "Should throw error if player one and player two are the same",
+			before:      defaultBeforeCallback,
 			input: input{
 				playerOne: makePlayerOne(),
 				playerTwo: makePlayerOne(),
@@ -165,11 +191,41 @@ func TestNewGame(t *testing.T) {
 				assert.Nil(t, actual.game)
 			},
 		},
+		{
+			description: "Should throw error if saving to repository returns error",
+			before: func(in input, mc *mockgenContainer) {
+				mc.repository.EXPECT().SaveGame(gomock.Any()).Return(errors.New("repository error"))
+			},
+			input: input{
+				playerOne: makePlayerOne(),
+				playerTwo: makePlayerTwo(),
+			},
+			assert: func(t *testing.T, _ input, actual output) {
+				wantErr := errors.New("repository error")
+				assert.Equal(t, wantErr, actual.err)
+				assert.Nil(t, actual.game)
+			},
+		},
+		{
+			description: "Should return game if saving to repository is ok",
+			before: func(in input, mc *mockgenContainer) {
+				mc.repository.EXPECT().SaveGame(gomock.Any()).Return(nil)
+			},
+			input: input{
+				playerOne: makePlayerOne(),
+				playerTwo: makePlayerTwo(),
+			},
+			assert: func(t *testing.T, _ input, actual output) {
+				assert.NoError(t, actual.err)
+				assert.NotNil(t, actual.game)
+			},
+		},
 	}
 
 	for _, tc := range testCases {
 		service, mc := MakeGameService(t)
 		defer mc.controller.Finish()
+		tc.before(tc.input, &mc)
 		actual, err := service.NewGame(tc.input.playerOne, tc.input.playerTwo)
 		tc.assert(t, tc.input, output{game: actual, err: err})
 	}
@@ -194,16 +250,8 @@ func TestMoveChecker(t *testing.T) {
 		assert      func(t *testing.T, in input, actual output)
 	}
 
-	defaultStubs := func(in input, mc *mockgenContainer) {
-		defaultGame := mocks.FakeGame()
-		defaultGame.ID = in.gameID
-		exp := mc.repository.EXPECT()
-		stubs := []*gomock.Call{
-			exp.FindGame(gomock.Any()).Return(&defaultGame, nil),
-		}
-		for i := range stubs {
-			stubs[i].AnyTimes()
-		}
+	defaultBeforeCallback := func(in input, mc *mockgenContainer) {
+		defaultStubs(mc)
 	}
 
 	testCases := []testCase{
@@ -222,7 +270,7 @@ func TestMoveChecker(t *testing.T) {
 		{
 			description: "Should throw error if select checker is before board init",
 			input:       input{from: structs.BOARD_INIT - 1},
-			before:      defaultStubs,
+			before:      defaultBeforeCallback,
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := errors.New("invalid_field:checker position is outside of board")
 				assert.Nil(t, actual.game)
@@ -231,7 +279,7 @@ func TestMoveChecker(t *testing.T) {
 		},
 		{
 			description: "Should throw error if select checker is after board end",
-			before:      defaultStubs,
+			before:      defaultBeforeCallback,
 			input:       input{from: structs.BOARD_END + 1},
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := errors.New("invalid_field:checker position is outside of board")
@@ -241,7 +289,7 @@ func TestMoveChecker(t *testing.T) {
 		},
 		{
 			description: "Should throw error if checker is nil at selected pos",
-			before:      defaultStubs,
+			before:      defaultBeforeCallback,
 			input:       input{from: structs.BOARD_INIT},
 			assert: func(t *testing.T, in input, actual output) {
 				wantErr := errors.New("invalid_field:no checker at selected position")

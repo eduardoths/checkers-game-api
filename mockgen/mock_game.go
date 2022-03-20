@@ -102,3 +102,17 @@ func (mr *MockGameRepositoryMockRecorder) FindGame(id interface{}) *gomock.Call 
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindGame", reflect.TypeOf((*MockGameRepository)(nil).FindGame), id)
 }
+
+// SaveGame mocks base method.
+func (m *MockGameRepository) SaveGame(game *structs.Game) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveGame", game)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveGame indicates an expected call of SaveGame.
+func (mr *MockGameRepositoryMockRecorder) SaveGame(game interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveGame", reflect.TypeOf((*MockGameRepository)(nil).SaveGame), game)
+}
