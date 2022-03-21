@@ -15,6 +15,7 @@ const (
 )
 
 var validMovements = []int{-18, -14, -9, -7, 7, 9, 14, 18}
+var jumpingMovements = []int{-18, -14, 14, 18}
 
 func NewBoard(playerOne, playerTwo *Player) *Board {
 	board := new(Board)
@@ -57,10 +58,25 @@ func (this *Board) isColumnValid(pos int) bool {
 func (this *Board) Move(from int, moveBy int) error {
 	newPos := from + moveBy
 	isNewPosValid := this.isValidPosition(newPos)
-	if !isNewPosValid {
+	isCurrentPosValid := this.isValidPosition(from)
+	if !isNewPosValid || isCurrentPosValid {
 		return domain.ErrInvalidMovement
 	}
+	movedChecker := this.GetCheckerFromPos(from)
+	if movedChecker == nil {
+		return domain.ErrNoCheckerAtSelectedPosition
+	}
 	if arrayutils.Contains(validMovements, moveBy) {
+		if arrayutils.Contains(jumpingMovements, moveBy) {
+			jumpedPiecePos := from + (moveBy / 2)
+			jumpedPiece := this.GetCheckerFromPos(jumpedPiecePos)
+			if jumpedPiece == nil {
+				return domain.ErrInvalidMovement
+			}
+			if jumpedPiece.Owner.ID == movedChecker.Owner.ID {
+				return domain.ErrInvalidMovement
+			}
+		}
 		return nil
 	}
 	return domain.ErrInvalidMovement

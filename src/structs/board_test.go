@@ -79,6 +79,11 @@ func TestMoveCheckerErrors(t *testing.T) {
 		want   error
 	}
 
+	playerOne := mocks.FakePlayerOne()
+	playerTwo := mocks.FakePlayerTwo()
+	checkerPlayerOne := mocks.FakeCheckerFromPlayer(&playerOne)
+	checkerPlayerTwo := mocks.FakeCheckerFromPlayer(&playerTwo)
+
 	testCases := map[string]testCase{
 		"it should not allow to move to the same position": {
 			board:  structs.Board{nil, &structs.Checker{}},
@@ -115,6 +120,40 @@ func TestMoveCheckerErrors(t *testing.T) {
 			from:   1,
 			moveBy: 7,
 			want:   domain.ErrInvalidMovement,
+		},
+		"it should return error if there's no checker at source": {
+			board:  structs.Board{},
+			from:   1,
+			moveBy: 7,
+			want:   domain.ErrInvalidMovement,
+		},
+		"it should return error if checker has jumped position checker from his team": {
+			board: structs.Board{
+				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
+				nil, nil, &checkerPlayerOne, nil, nil, nil, nil, nil,
+				nil, nil, nil, nil, nil, nil, nil, nil,
+			},
+			from:   1,
+			moveBy: 18,
+			want:   domain.ErrInvalidMovement,
+		},
+		"it should return error if checker has not jumped anyone": {
+			board: structs.Board{
+				nil, &checkerPlayerOne,
+			},
+			from:   1,
+			moveBy: 18,
+			want:   domain.ErrInvalidMovement,
+		},
+		"it should not return error if checker has jumped enemy": {
+			board: structs.Board{
+				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
+				nil, nil, &checkerPlayerTwo, nil, nil, nil, nil, nil,
+				nil, nil, nil, nil, nil, nil, nil, nil,
+			},
+			from:   1,
+			moveBy: 18,
+			want:   nil,
 		},
 	}
 	for desc, tc := range testCases {
