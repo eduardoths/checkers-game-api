@@ -60,10 +60,5 @@ func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*str
 		return nil, domain.ErrInvalidFieldMovementsArray
 	}
 
-	isValidPosition := game.Board.IsValidPosition(from + movements[0])
-	if !isValidPosition {
-		return nil, domain.ErrInvalidMovement
-	}
-
 	return nil, nil
 }

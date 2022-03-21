@@ -1,6 +1,9 @@
 package structs
 
-import "github.com/eduardoths/checkers-game/src/domain"
+import (
+	"github.com/eduardoths/checkers-game/internal/arrayutils"
+	"github.com/eduardoths/checkers-game/src/domain"
+)
 
 type Board [ROW_LENGTH * COLUMN_LENGTH]*Checker
 
@@ -51,6 +54,18 @@ func (this *Board) isColumnValid(pos int) bool {
 	return false
 }
 
+func (this *Board) Move(from int, moveBy int) error {
+	newPos := from + moveBy
+	isNewPosValid := this.isValidPosition(newPos)
+	if !isNewPosValid {
+		return domain.ErrInvalidMovement
+	}
+	if arrayutils.Contains(validMovements, moveBy) {
+		return nil
+	}
+	return domain.ErrInvalidMovement
+}
+
 func (this *Board) GetCheckerFromPos(pos int) *Checker {
 	if this.positionIsOnBoard(pos) {
 		return this[pos]
@@ -58,7 +73,7 @@ func (this *Board) GetCheckerFromPos(pos int) *Checker {
 	return nil
 }
 
-func (this *Board) IsValidPosition(pos int) bool {
+func (this *Board) isValidPosition(pos int) bool {
 	validations := []func(int) bool{
 		this.positionIsOnBoard,
 		this.isColumnValid,
@@ -73,11 +88,6 @@ func (this *Board) IsValidPosition(pos int) bool {
 	return true
 }
 
-func (this *Board) positionHasNoChecker(pos int) bool {
-	checker := this.GetCheckerFromPos(pos)
-	return checker == nil
-}
-
 func (this *Board) positionIsOnBoard(pos int) bool {
 	if pos >= BOARD_INIT && pos <= BOARD_END {
 		return true
@@ -85,6 +95,7 @@ func (this *Board) positionIsOnBoard(pos int) bool {
 	return false
 }
 
-func (this *Board) Move(from int, mobeBy int) error {
-	return domain.ErrInvalidMovement
+func (this *Board) positionHasNoChecker(pos int) bool {
+	checker := this.GetCheckerFromPos(pos)
+	return checker == nil
 }
