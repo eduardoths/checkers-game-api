@@ -1,5 +1,7 @@
 package structs
 
+import "github.com/eduardoths/checkers-game/src/domain"
+
 type Board [ROW_LENGTH * COLUMN_LENGTH]*Checker
 
 const (
@@ -8,6 +10,8 @@ const (
 	BOARD_INIT    = 0
 	BOARD_END     = 63
 )
+
+var validMovements = []int{-18, -14, -9, -7, 7, 9, 14, 18}
 
 func NewBoard(playerOne, playerTwo *Player) *Board {
 	board := new(Board)
@@ -79,4 +83,8 @@ func (this *Board) positionIsOnBoard(pos int) bool {
 		return true
 	}
 	return false
+}
+
+func (this *Board) Move(from int, mobeBy int) error {
+	return domain.ErrInvalidMovement
 }

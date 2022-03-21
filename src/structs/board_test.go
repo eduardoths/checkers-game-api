@@ -3,6 +3,7 @@ package structs_test
 import (
 	"testing"
 
+	"github.com/eduardoths/checkers-game/src/domain"
 	"github.com/eduardoths/checkers-game/src/structs"
 	"github.com/eduardoths/checkers-game/src/tests/mocks"
 	"github.com/stretchr/testify/assert"
@@ -107,6 +108,30 @@ func TestIsPositionValidForMovement(t *testing.T) {
 	for description, tc := range testCases {
 		t.Run(description, func(t *testing.T) {
 			actual := tc.board.IsValidPosition(tc.position)
+			assert.Equal(t, tc.want, actual)
+		})
+	}
+}
+
+func TestMoveChecker(t *testing.T) {
+	type testCase struct {
+		board  structs.Board
+		from   int
+		moveBy int
+		want   error
+	}
+
+	testCases := map[string]testCase{
+		"it should not allow to move to the same position": {
+			board:  structs.Board{nil, &structs.Checker{}},
+			from:   1,
+			moveBy: 0,
+			want:   domain.ErrInvalidMovement,
+		},
+	}
+	for desc, tc := range testCases {
+		t.Run(desc, func(t *testing.T) {
+			actual := tc.board.Move(tc.from, tc.moveBy)
 			assert.Equal(t, tc.want, actual)
 		})
 	}
