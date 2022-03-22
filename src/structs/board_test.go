@@ -130,8 +130,7 @@ func TestMoveCheckerErrors(t *testing.T) {
 		"it should return error if checker has jumped position checker from his team": {
 			board: structs.Board{
 				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
-				nil, nil, &checkerPlayerOne, nil, nil, nil, nil, nil,
-				nil, nil, nil, nil, nil, nil, nil, nil,
+				nil, nil, &checkerPlayerOne,
 			},
 			from:   1,
 			moveBy: 18,
@@ -165,6 +164,41 @@ func TestMoveCheckerErrors(t *testing.T) {
 		t.Run(desc, func(t *testing.T) {
 			actual := tc.board.Move(tc.from, tc.moveBy)
 			assert.Equal(t, tc.want, actual)
+		})
+	}
+}
+
+func TestBoardAfterMovement(t *testing.T) {
+	playerOne := mocks.FakePlayerOne()
+	playerTwo := mocks.FakePlayerTwo()
+	checkerPlayerOne := mocks.FakeCheckerFromPlayer(&playerOne)
+	checkerPlayerTwo := mocks.FakeCheckerFromPlayer(&playerTwo)
+
+	type testCase struct {
+		before structs.Board
+		after  structs.Board
+		from   int
+		moveBy int
+	}
+	testCases := map[string]testCase{
+		"should not change board if movement returns error": {
+			before: structs.Board{
+				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
+				nil, nil, &checkerPlayerTwo,
+			},
+			after: structs.Board{
+				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
+				nil, nil, &checkerPlayerTwo,
+			},
+			from:   1,
+			moveBy: 9,
+		},
+	}
+
+	for desc, tc := range testCases {
+		t.Run(desc, func(t *testing.T) {
+			tc.before.Move(tc.from, tc.moveBy)
+			assert.Equal(t, tc.before, tc.after)
 		})
 	}
 }
