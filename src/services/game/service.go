@@ -59,6 +59,8 @@ func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*str
 	if len(movements) == 0 {
 		return nil, domain.ErrInvalidFieldMovementsArray
 	}
-
+	if err := game.Board.Move(from, movements[0]); err != nil {
+		return nil, err
+	}
 	return nil, nil
 }
