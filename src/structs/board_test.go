@@ -148,11 +148,16 @@ func TestMoveCheckerErrors(t *testing.T) {
 		"it should not return error if checker has jumped enemy": {
 			board: structs.Board{
 				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
-				nil, nil, &checkerPlayerTwo, nil, nil, nil, nil, nil,
-				nil, nil, nil, nil, nil, nil, nil, nil,
+				nil, nil, &checkerPlayerTwo,
 			},
 			from:   1,
 			moveBy: 18,
+			want:   nil,
+		},
+		"it should not return error if it's a valid movement": {
+			board:  structs.Board{nil, &checkerPlayerOne},
+			from:   1,
+			moveBy: 7,
 			want:   nil,
 		},
 	}
