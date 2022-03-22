@@ -69,6 +69,7 @@ func (this *Board) Move(from int, moveBy int) error {
 }
 
 func (this *Board) executeMovement(from, moveBy int) error {
+	newPos := from + moveBy
 	movedChecker := this.GetCheckerFromPos(from)
 	if movedChecker == nil {
 		return domain.ErrNoCheckerAtSelectedPosition
@@ -83,7 +84,10 @@ func (this *Board) executeMovement(from, moveBy int) error {
 			if jumpedPiece.Owner.ID == movedChecker.Owner.ID {
 				return domain.ErrInvalidMovement
 			}
+			this[jumpedPiecePos] = nil
 		}
+		this[from] = nil
+		this[newPos] = movedChecker
 		return nil
 	}
 	return domain.ErrInvalidMovement

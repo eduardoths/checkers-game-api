@@ -175,30 +175,52 @@ func TestBoardAfterMovement(t *testing.T) {
 	checkerPlayerTwo := mocks.FakeCheckerFromPlayer(&playerTwo)
 
 	type testCase struct {
-		before structs.Board
-		after  structs.Board
+		board  structs.Board
+		want   structs.Board
 		from   int
 		moveBy int
 	}
 	testCases := map[string]testCase{
 		"should not change board if movement returns error": {
-			before: structs.Board{
-				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
-				nil, nil, &checkerPlayerTwo,
-			},
-			after: structs.Board{
+			board: structs.Board{
 				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
 				nil, nil, &checkerPlayerTwo,
 			},
 			from:   1,
 			moveBy: 9,
+			want: structs.Board{
+				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
+				nil, nil, &checkerPlayerTwo,
+			},
+		},
+		"should move checker if it's not jumping": {
+			board:  structs.Board{nil, &checkerPlayerOne},
+			from:   1,
+			moveBy: 7,
+			want: structs.Board{
+				nil, nil, nil, nil, nil, nil, nil, nil,
+				&checkerPlayerOne,
+			},
+		},
+		"should eat checker if it's jumped": {
+			board: structs.Board{
+				nil, &checkerPlayerOne, nil, nil, nil, nil, nil, nil,
+				nil, nil, &checkerPlayerTwo,
+			},
+			from:   1,
+			moveBy: 18,
+			want: structs.Board{
+				nil, nil, nil, nil, nil, nil, nil, nil,
+				nil, nil, nil, nil, nil, nil, nil, nil,
+				nil, nil, nil, &checkerPlayerOne,
+			},
 		},
 	}
 
 	for desc, tc := range testCases {
 		t.Run(desc, func(t *testing.T) {
-			tc.before.Move(tc.from, tc.moveBy)
-			assert.Equal(t, tc.before, tc.after)
+			tc.board.Move(tc.from, tc.moveBy)
+			assert.Equal(t, tc.want, tc.board)
 		})
 	}
 }
