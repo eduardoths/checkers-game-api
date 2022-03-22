@@ -62,6 +62,13 @@ func (this *Board) Move(from int, moveBy int) error {
 	if !isNewPosValid || isCurrentPosValid {
 		return domain.ErrInvalidMovement
 	}
+	if err := this.executeMovement(from, moveBy); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *Board) executeMovement(from, moveBy int) error {
 	movedChecker := this.GetCheckerFromPos(from)
 	if movedChecker == nil {
 		return domain.ErrNoCheckerAtSelectedPosition
