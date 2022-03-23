@@ -8,9 +8,9 @@ import (
 	"github.com/eduardoths/checkers-game/src/domain"
 	"github.com/eduardoths/checkers-game/src/interfaces"
 	"github.com/eduardoths/checkers-game/src/repositories"
-	"github.com/eduardoths/checkers-game/src/services/game"
 	"github.com/eduardoths/checkers-game/src/structs"
 	"github.com/eduardoths/checkers-game/src/tests/mocks"
+	"github.com/eduardoths/checkers-game/src/use_cases/game"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -38,7 +38,7 @@ func defaultStubs(mc *mockgenContainer) {
 	}
 }
 
-func MakeGameService(t *testing.T) (interfaces.GameService, mockgenContainer) {
+func MakeGameUseCases(t *testing.T) (interfaces.GameUseCases, mockgenContainer) {
 	ctrl := gomock.NewController(t)
 	mc := mockgenContainer{
 		controller: ctrl,
@@ -47,7 +47,7 @@ func MakeGameService(t *testing.T) (interfaces.GameService, mockgenContainer) {
 	rc := repositories.RepositoriesContainer{
 		GameRepository: mc.repository,
 	}
-	return game.NewGameService(rc), mc
+	return game.NewGameUseCases(rc), mc
 }
 
 func TestNewGame(t *testing.T) {
@@ -224,10 +224,10 @@ func TestNewGame(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		service, mc := MakeGameService(t)
+		useCases, mc := MakeGameUseCases(t)
 		defer mc.controller.Finish()
 		tc.before(tc.input, &mc)
-		actual, err := service.NewGame(tc.input.playerOne, tc.input.playerTwo)
+		actual, err := useCases.NewGame(tc.input.playerOne, tc.input.playerTwo)
 		tc.assert(t, tc.input, output{game: actual, err: err})
 	}
 }
@@ -306,10 +306,10 @@ func TestMoveChecker(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			service, mc := MakeGameService(t)
+			useCases, mc := MakeGameUseCases(t)
 			defer mc.controller.Finish()
 			tc.before(tc.input, &mc)
-			game, err := service.Move(tc.input.gameID, tc.input.from, tc.input.movements)
+			game, err := useCases.Move(tc.input.gameID, tc.input.from, tc.input.movements)
 			tc.assert(t, tc.input, output{game: game, err: err})
 		})
 	}

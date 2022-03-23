@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type GameService interface {
+type GameUseCases interface {
 	NewGame(playerOne, playerTwo *structs.Player) (*structs.Game, error)
 	Move(gameID uuid.UUID, from int, movements []int) (*structs.Game, error)
 }

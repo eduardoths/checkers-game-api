@@ -12,31 +12,31 @@ import (
 	uuid "github.com/google/uuid"
 )
 
-// MockGameService is a mock of GameService interface.
-type MockGameService struct {
+// MockGameUseCases is a mock of GameUseCases interface.
+type MockGameUseCases struct {
 	ctrl     *gomock.Controller
-	recorder *MockGameServiceMockRecorder
+	recorder *MockGameUseCasesMockRecorder
 }
 
-// MockGameServiceMockRecorder is the mock recorder for MockGameService.
-type MockGameServiceMockRecorder struct {
-	mock *MockGameService
+// MockGameUseCasesMockRecorder is the mock recorder for MockGameUseCases.
+type MockGameUseCasesMockRecorder struct {
+	mock *MockGameUseCases
 }
 
-// NewMockGameService creates a new mock instance.
-func NewMockGameService(ctrl *gomock.Controller) *MockGameService {
-	mock := &MockGameService{ctrl: ctrl}
-	mock.recorder = &MockGameServiceMockRecorder{mock}
+// NewMockGameUseCases creates a new mock instance.
+func NewMockGameUseCases(ctrl *gomock.Controller) *MockGameUseCases {
+	mock := &MockGameUseCases{ctrl: ctrl}
+	mock.recorder = &MockGameUseCasesMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockGameService) EXPECT() *MockGameServiceMockRecorder {
+func (m *MockGameUseCases) EXPECT() *MockGameUseCasesMockRecorder {
 	return m.recorder
 }
 
 // Move mocks base method.
-func (m *MockGameService) Move(gameID uuid.UUID, from int, movements []int) (*structs.Game, error) {
+func (m *MockGameUseCases) Move(gameID uuid.UUID, from int, movements []int) (*structs.Game, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Move", gameID, from, movements)
 	ret0, _ := ret[0].(*structs.Game)
@@ -45,13 +45,13 @@ func (m *MockGameService) Move(gameID uuid.UUID, from int, movements []int) (*st
 }
 
 // Move indicates an expected call of Move.
-func (mr *MockGameServiceMockRecorder) Move(gameID, from, movements interface{}) *gomock.Call {
+func (mr *MockGameUseCasesMockRecorder) Move(gameID, from, movements interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Move", reflect.TypeOf((*MockGameService)(nil).Move), gameID, from, movements)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Move", reflect.TypeOf((*MockGameUseCases)(nil).Move), gameID, from, movements)
 }
 
 // NewGame mocks base method.
-func (m *MockGameService) NewGame(playerOne, playerTwo *structs.Player) (*structs.Game, error) {
+func (m *MockGameUseCases) NewGame(playerOne, playerTwo *structs.Player) (*structs.Game, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NewGame", playerOne, playerTwo)
 	ret0, _ := ret[0].(*structs.Game)
@@ -60,9 +60,9 @@ func (m *MockGameService) NewGame(playerOne, playerTwo *structs.Player) (*struct
 }
 
 // NewGame indicates an expected call of NewGame.
-func (mr *MockGameServiceMockRecorder) NewGame(playerOne, playerTwo interface{}) *gomock.Call {
+func (mr *MockGameUseCasesMockRecorder) NewGame(playerOne, playerTwo interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewGame", reflect.TypeOf((*MockGameService)(nil).NewGame), playerOne, playerTwo)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewGame", reflect.TypeOf((*MockGameUseCases)(nil).NewGame), playerOne, playerTwo)
 }
 
 // MockGameRepository is a mock of GameRepository interface.
