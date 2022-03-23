@@ -58,13 +58,22 @@ func TestExecuteMovementErrors(t *testing.T) {
 	playerTwo := mocks.FakePlayerTwo()
 	playerOneMovingBackwards := structs.Board{}
 	playerOneMovingBackwards[8] = &structs.Checker{Owner: &playerOne, IsKing: false}
+
 	playerTwoMovingBackwards := structs.Board{nil, &structs.Checker{Owner: &playerTwo, IsKing: false}}
+
 	playerOneKingMovingBackwards := structs.Board{}
 	playerOneKingMovingBackwards[8] = &structs.Checker{Owner: &playerOne, IsKing: true}
+
 	playerTwoKingMovingBackwards := structs.Board{nil, &structs.Checker{Owner: &playerTwo, IsKing: true}}
+
 	multipleMovementsBoard := structs.Board{}
 	multipleMovementsBoard[1] = &structs.Checker{Owner: &playerOne}
 	multipleMovementsBoard[10] = &structs.Checker{Owner: &playerTwo}
+
+	validMultipleMovementsBoard := structs.Board{}
+	validMultipleMovementsBoard[1] = &structs.Checker{Owner: &playerOne, IsKing: true}
+	validMultipleMovementsBoard[10] = &structs.Checker{Owner: &playerTwo}
+	validMultipleMovementsBoard[5] = &structs.Checker{Owner: &playerTwo}
 
 	notPlayerOneTurn := mocks.FakeGame()
 	notPlayerTwoTurn := mocks.FakeGame()
@@ -94,6 +103,12 @@ func TestExecuteMovementErrors(t *testing.T) {
 	}
 	multipleMovementsWithNoJumpingOne := structs.Game{
 		Board:           &multipleMovementsBoard,
+		PlayerOne:       &playerOne,
+		PlayerTwo:       &playerTwo,
+		IsPlayerOneTurn: true,
+	}
+	validMultipleMovements := structs.Game{
+		Board:           &validMultipleMovementsBoard,
 		PlayerOne:       &playerOne,
 		PlayerTwo:       &playerTwo,
 		IsPlayerOneTurn: true,
@@ -151,6 +166,11 @@ func TestExecuteMovementErrors(t *testing.T) {
 			game:  multipleMovementsWithNoJumpingOne,
 			input: input{from: 1, moveBy: []int{18, 9}},
 			want:  domain.ErrInvalidMovement,
+		},
+		"Should not return error if sequence of multiple movements is valid": {
+			game:  validMultipleMovements,
+			input: input{from: 1, moveBy: []int{18, -14}},
+			want:  nil,
 		},
 	}
 

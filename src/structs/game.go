@@ -36,7 +36,12 @@ func (this *Game) ExecuteMovements(from int, movements []int) error {
 	}
 	multipleMovements := len(movements) >= 2
 	if multipleMovements {
-		return domain.ErrInvalidMovement
+		for _, movement := range movements {
+			isJumping := isJumpingMovement(movement)
+			if !isJumping {
+				return domain.ErrInvalidMovement
+			}
+		}
 	}
 
 	validDirection := source.IsKing || (this.IsPlayerOneTurn == (movements[0] >= 0))

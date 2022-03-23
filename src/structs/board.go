@@ -17,6 +17,14 @@ const (
 var validMovements = []int{-18, -14, -9, -7, 7, 9, 14, 18}
 var jumpingMovements = []int{-18, -14, 14, 18}
 
+func isValidMovement(moveBy int) bool {
+	return arrayutils.Contains(validMovements, moveBy)
+}
+
+func isJumpingMovement(moveBy int) bool {
+	return arrayutils.Contains(jumpingMovements, moveBy)
+}
+
 func NewBoard(playerOne, playerTwo *Player) *Board {
 	board := new(Board)
 	board.fillPlayerOneCheckers(playerOne)
@@ -74,8 +82,8 @@ func (this *Board) executeMovement(from, moveBy int) error {
 	if movedChecker == nil {
 		return domain.ErrNoCheckerAtSelectedPosition
 	}
-	if arrayutils.Contains(validMovements, moveBy) {
-		if arrayutils.Contains(jumpingMovements, moveBy) {
+	if isValidMovement(moveBy) {
+		if isJumpingMovement(moveBy) {
 			jumpedPiecePos := from + (moveBy / 2)
 			jumpedPiece := this.GetCheckerFromPos(jumpedPiecePos)
 			if jumpedPiece == nil {
