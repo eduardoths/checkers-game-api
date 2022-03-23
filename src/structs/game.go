@@ -1,6 +1,9 @@
 package structs
 
-import "github.com/google/uuid"
+import (
+	"github.com/eduardoths/checkers-game/src/domain"
+	"github.com/google/uuid"
+)
 
 type Game struct {
 	ID              uuid.UUID
@@ -15,4 +18,25 @@ func (this *Game) CurrentPlayerID() uuid.UUID {
 		return this.PlayerOne.ID
 	}
 	return this.PlayerTwo.ID
+}
+
+func (this *Game) ExecuteMovements(from int, movements []int) error {
+	source := this.Board.GetCheckerFromPos(from)
+	if source == nil {
+		return domain.ErrNoCheckerAtSelectedPosition
+	}
+
+	currentPlayerID := this.CurrentPlayerID()
+	if source.Owner.ID != currentPlayerID {
+		return domain.ErrNotPlayersTurn
+	}
+
+	if len(movements) == 0 {
+		return domain.ErrInvalidFieldMovementsArray
+	}
+	if err := this.Board.Move(from, movements[0]); err != nil {
+		return err
+	}
+	this.IsPlayerOneTurn = !this.IsPlayerOneTurn
+	return nil
 }

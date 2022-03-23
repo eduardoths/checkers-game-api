@@ -3,7 +3,6 @@ package game
 import (
 	"errors"
 
-	"github.com/eduardoths/checkers-game/src/domain"
 	"github.com/eduardoths/checkers-game/src/interfaces"
 	"github.com/eduardoths/checkers-game/src/repositories"
 	"github.com/eduardoths/checkers-game/src/structs"
@@ -46,21 +45,9 @@ func (this *GameService) Move(gameID uuid.UUID, from int, movements []int) (*str
 		return nil, err
 	}
 
-	source := game.Board.GetCheckerFromPos(from)
-	if source == nil {
-		return nil, domain.ErrNoCheckerAtSelectedPosition
-	}
-
-	currentPlayerID := game.CurrentPlayerID()
-	if source.Owner.ID != currentPlayerID {
-		return nil, domain.ErrNotPlayersTurn
-	}
-
-	if len(movements) == 0 {
-		return nil, domain.ErrInvalidFieldMovementsArray
-	}
-	if err := game.Board.Move(from, movements[0]); err != nil {
+	if err := game.ExecuteMovements(from, movements); err != nil {
 		return nil, err
 	}
-	return nil, nil
+
+	return game, nil
 }

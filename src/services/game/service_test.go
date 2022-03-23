@@ -251,10 +251,6 @@ func TestMoveChecker(t *testing.T) {
 		assert      func(t *testing.T, in input, actual output)
 	}
 
-	defaultBeforeCallback := func(in input, mc *mockgenContainer) {
-		defaultStubs(mc)
-	}
-
 	testCases := []testCase{
 		{
 			description: "Should throw error if game's not found",
@@ -269,68 +265,41 @@ func TestMoveChecker(t *testing.T) {
 			},
 		},
 		{
-			description: "Should throw error if checker is nil at selected pos",
-			before:      defaultBeforeCallback,
-			input:       input{from: structs.BOARD_INIT},
+			description: "Should throw error if game's movement execution returns error",
+			input:       input{gameID: uuid.New()},
+			before: func(in input, mc *mockgenContainer) {
+				game := mocks.FakeGame()
+				game.Board = &structs.Board{}
+				mc.repository.EXPECT().FindGame(gomock.Eq(in.gameID)).Return(&game, nil)
+			},
 			assert: func(t *testing.T, in input, actual output) {
-				wantErr := domain.ErrNoCheckerAtSelectedPosition
 				assert.Nil(t, actual.game)
-				assert.Equal(t, wantErr, actual.err)
+				assert.Equal(t, domain.ErrNoCheckerAtSelectedPosition, actual.err)
 			},
 		},
 		{
-			description: "Should throw error if it's not the player one turn",
+			description: "Should return correct board if valid movement is made",
+			input:       input{gameID: uuid.New(), from: 17, movements: []int{9}},
 			before: func(in input, mc *mockgenContainer) {
 				game := mocks.FakeGame()
-				checker := mocks.FakeCheckerFromPlayer(game.PlayerOne)
-				board := &structs.Board{&checker}
-				game.Board = board
-				game.IsPlayerOneTurn = false
 				game.ID = in.gameID
 				mc.repository.EXPECT().FindGame(gomock.Eq(in.gameID)).Return(&game, nil)
 			},
-			input: input{gameID: uuid.New(), from: 0},
 			assert: func(t *testing.T, in input, actual output) {
-				wantErr := domain.ErrNotPlayersTurn
-				assert.Nil(t, actual.game)
-				assert.Equal(t, wantErr, actual.err)
-			},
-		},
-		{
-			description: "Should throw error if it's not the player two turns",
-			before: func(in input, mc *mockgenContainer) {
-				game := mocks.FakeGame()
-				checker := mocks.FakeCheckerFromPlayer(game.PlayerTwo)
-				board := &structs.Board{&checker}
-				game.Board = board
-				game.ID = in.gameID
-				mc.repository.EXPECT().FindGame(gomock.Eq(in.gameID)).Return(&game, nil)
-			},
-			input: input{gameID: uuid.New(), from: 0},
-			assert: func(t *testing.T, in input, actual output) {
-				wantErr := domain.ErrNotPlayersTurn
-				assert.Nil(t, actual.game)
-				assert.Equal(t, wantErr, actual.err)
-			},
-		},
-		{
-			description: "It should throw error if movement validation fails",
-			before:      defaultBeforeCallback,
-			input:       input{from: 1, movements: []int{-1}},
-			assert: func(t *testing.T, in input, actual output) {
-				wantErr := domain.ErrInvalidMovement
-				assert.Nil(t, actual.game)
-				assert.Equal(t, wantErr, actual.err)
-			},
-		},
-		{
-			description: "Should throw error if movements array's size is zero",
-			before:      defaultBeforeCallback,
-			input:       input{from: 1},
-			assert: func(t *testing.T, in input, actual output) {
-				wantErr := domain.ErrInvalidFieldMovementsArray
-				assert.Nil(t, actual.game)
-				assert.Equal(t, wantErr, actual.err)
+				wantPlayerOne := mocks.FakePlayerOne()
+				wantPlayerTwo := mocks.FakePlayerTwo()
+				wantBoard := mocks.FakeBoard()
+				wantBoard[26] = wantBoard[17]
+				wantBoard[17] = nil
+				want := &structs.Game{
+					ID:              in.gameID,
+					Board:           &wantBoard,
+					PlayerOne:       &wantPlayerOne,
+					PlayerTwo:       &wantPlayerTwo,
+					IsPlayerOneTurn: false,
+				}
+				assert.Equal(t, want, actual.game)
+				assert.NoError(t, actual.err)
 			},
 		},
 	}
