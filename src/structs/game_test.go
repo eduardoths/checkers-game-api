@@ -62,6 +62,9 @@ func TestExecuteMovementErrors(t *testing.T) {
 	playerOneKingMovingBackwards := structs.Board{}
 	playerOneKingMovingBackwards[8] = &structs.Checker{Owner: &playerOne, IsKing: true}
 	playerTwoKingMovingBackwards := structs.Board{nil, &structs.Checker{Owner: &playerTwo, IsKing: true}}
+	multipleMovementsBoard := structs.Board{}
+	multipleMovementsBoard[1] = &structs.Checker{Owner: &playerOne}
+	multipleMovementsBoard[10] = &structs.Checker{Owner: &playerTwo}
 
 	notPlayerOneTurn := mocks.FakeGame()
 	notPlayerTwoTurn := mocks.FakeGame()
@@ -88,6 +91,12 @@ func TestExecuteMovementErrors(t *testing.T) {
 		PlayerOne:       &playerOne,
 		PlayerTwo:       &playerTwo,
 		IsPlayerOneTurn: false,
+	}
+	multipleMovementsWithNoJumpingOne := structs.Game{
+		Board:           &multipleMovementsBoard,
+		PlayerOne:       &playerOne,
+		PlayerTwo:       &playerTwo,
+		IsPlayerOneTurn: true,
 	}
 
 	notPlayerOneTurn.IsPlayerOneTurn = false
@@ -137,6 +146,11 @@ func TestExecuteMovementErrors(t *testing.T) {
 			game:  playerTwoKingMovingBackwardsGame,
 			input: input{from: 1, moveBy: []int{7}},
 			want:  nil,
+		},
+		"Should return error if sequence of multiple movements has a non jumping one": {
+			game:  multipleMovementsWithNoJumpingOne,
+			input: input{from: 1, moveBy: []int{18, 9}},
+			want:  domain.ErrInvalidMovement,
 		},
 	}
 
