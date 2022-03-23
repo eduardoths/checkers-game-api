@@ -34,6 +34,10 @@ func (this *Game) ExecuteMovements(from int, movements []int) error {
 	if len(movements) == 0 {
 		return domain.ErrInvalidFieldMovementsArray
 	}
+	validDirection := source.IsKing || (this.IsPlayerOneTurn == (movements[0] >= 0))
+	if !validDirection {
+		return domain.ErrInvalidMovement
+	}
 	if err := this.Board.Move(from, movements[0]); err != nil {
 		return err
 	}

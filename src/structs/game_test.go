@@ -43,7 +43,7 @@ func TestCurrentPlayerID(t *testing.T) {
 	}
 }
 
-func TestExecuteMovement(t *testing.T) {
+func TestExecuteMovementErrors(t *testing.T) {
 	type input struct {
 		from   int
 		moveBy []int
@@ -54,9 +54,41 @@ func TestExecuteMovement(t *testing.T) {
 		input input
 		want  error
 	}
+	playerOne := mocks.FakePlayerOne()
+	playerTwo := mocks.FakePlayerTwo()
+	playerOneMovingBackwards := structs.Board{}
+	playerOneMovingBackwards[8] = &structs.Checker{Owner: &playerOne, IsKing: false}
+	playerTwoMovingBackwards := structs.Board{nil, &structs.Checker{Owner: &playerTwo, IsKing: false}}
+	playerOneKingMovingBackwards := structs.Board{}
+	playerOneKingMovingBackwards[8] = &structs.Checker{Owner: &playerOne, IsKing: true}
+	playerTwoKingMovingBackwards := structs.Board{nil, &structs.Checker{Owner: &playerTwo, IsKing: true}}
 
 	notPlayerOneTurn := mocks.FakeGame()
 	notPlayerTwoTurn := mocks.FakeGame()
+	playerOneMovingBackwardsGame := structs.Game{
+		Board:           &playerOneMovingBackwards,
+		PlayerOne:       &playerOne,
+		PlayerTwo:       &playerTwo,
+		IsPlayerOneTurn: true,
+	}
+	playerTwoMovingBackwardsGame := structs.Game{
+		Board:           &playerTwoMovingBackwards,
+		PlayerOne:       &playerOne,
+		PlayerTwo:       &playerTwo,
+		IsPlayerOneTurn: false,
+	}
+	playerOneKingMovingBackwardsGame := structs.Game{
+		Board:           &playerOneKingMovingBackwards,
+		PlayerOne:       &playerOne,
+		PlayerTwo:       &playerTwo,
+		IsPlayerOneTurn: true,
+	}
+	playerTwoKingMovingBackwardsGame := structs.Game{
+		Board:           &playerTwoKingMovingBackwards,
+		PlayerOne:       &playerOne,
+		PlayerTwo:       &playerTwo,
+		IsPlayerOneTurn: false,
+	}
 
 	notPlayerOneTurn.IsPlayerOneTurn = false
 
@@ -85,6 +117,26 @@ func TestExecuteMovement(t *testing.T) {
 			game:  mocks.FakeGame(),
 			input: input{from: 1},
 			want:  domain.ErrInvalidFieldMovementsArray,
+		},
+		"Should return error if player one non king tries to move backwards": {
+			game:  playerOneMovingBackwardsGame,
+			input: input{from: 8, moveBy: []int{-7}},
+			want:  domain.ErrInvalidMovement,
+		},
+		"Should return error if player two non king tries to move backwards": {
+			game:  playerTwoMovingBackwardsGame,
+			input: input{from: 1, moveBy: []int{7}},
+			want:  domain.ErrInvalidMovement,
+		},
+		"Should return nilif player one king tries to move backwards": {
+			game:  playerOneKingMovingBackwardsGame,
+			input: input{from: 8, moveBy: []int{-7}},
+			want:  nil,
+		},
+		"Should return nil if player two king tries to move backwards": {
+			game:  playerTwoKingMovingBackwardsGame,
+			input: input{from: 1, moveBy: []int{7}},
+			want:  nil,
 		},
 	}
 
