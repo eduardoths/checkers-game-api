@@ -8,9 +8,9 @@ import (
 	"github.com/eduardoths/checkers-game/src/domain"
 	"github.com/eduardoths/checkers-game/src/interfaces"
 	"github.com/eduardoths/checkers-game/src/repositories"
+	"github.com/eduardoths/checkers-game/src/services/game"
 	"github.com/eduardoths/checkers-game/src/structs"
 	"github.com/eduardoths/checkers-game/src/tests/mocks"
-	"github.com/eduardoths/checkers-game/src/use_cases/game"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -38,7 +38,7 @@ func defaultStubs(mc *mockgenContainer) {
 	}
 }
 
-func MakeGameUseCases(t *testing.T) (interfaces.GameUseCases, mockgenContainer) {
+func MakeGameUseCases(t *testing.T) (interfaces.GameService, mockgenContainer) {
 	ctrl := gomock.NewController(t)
 	mc := mockgenContainer{
 		controller: ctrl,
@@ -47,7 +47,7 @@ func MakeGameUseCases(t *testing.T) (interfaces.GameUseCases, mockgenContainer) 
 	rc := repositories.RepositoriesContainer{
 		GameRepository: mc.repository,
 	}
-	return game.NewGameUseCases(rc), mc
+	return game.NewGameService(rc), mc
 }
 
 func TestNewGame(t *testing.T) {
